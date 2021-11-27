@@ -16,7 +16,7 @@ import java.util.NoSuchElementException;
 @Service
 @AllArgsConstructor
 public class TagServiceImpl implements TagService {
-    private TagRepo tagRepo;
+    private final TagRepo tagRepo;
 
     @Override
     public TagGetUpdateDTO get(Long id) {

@@ -10,10 +10,10 @@ import pl.polsl.reviewersapp.api.model.dto.reviewer.ReviewerGetDTO;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ThesisGetUpdateDTO {
+public class ThesisGetDTO {
     private Long id;
-    private String name;
-    private String surname;
+    private String authorName;
+    private String authorSurname;
     private String topic;
     private ReviewerGetDTO reviewer;
 }

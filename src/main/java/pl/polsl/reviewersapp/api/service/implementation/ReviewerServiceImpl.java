@@ -22,9 +22,9 @@ import java.util.NoSuchElementException;
 @Service
 @AllArgsConstructor
 public class ReviewerServiceImpl implements ReviewerService {
-    private ReviewerRepo reviewerRepo;
-    private FacultyRepo facultyRepo;
-    private TagRepo tagRepo;
+    private final ReviewerRepo reviewerRepo;
+    private final FacultyRepo facultyRepo;
+    private final TagRepo tagRepo;
 
     @Override
     public ReviewerGetDTO get(Long id) {
@@ -58,11 +58,25 @@ public class ReviewerServiceImpl implements ReviewerService {
     @Override
     @Transactional
     public ReviewerGetDTO update(ReviewerUpdateDTO input) {
-        return null;
+        ReviewerEntity reviewerEntity = reviewerRepo.findById(input.getId())
+                .orElseThrow(() -> new NoSuchElementException(String.format("Reviewer id %d does not exist", input.getFacultyId())));
+        FacultyEntity facultyEntity = facultyRepo.findById(input.getFacultyId())
+                .orElseThrow(() -> new NoSuchElementException(String.format("Faculty id %d does not exist", input.getFacultyId())));
+        List<TagEntity> tagEntityList = new ArrayList<>();
+        for (Long id : input.getTagIdList()) {
+            tagEntityList.add(tagRepo.findById(id)
+                    .orElseThrow(() -> new NoSuchElementException(String.format("Tag id %d does not exist", id))));
+        }
+        reviewerEntity.setFaculty(facultyEntity);
+        reviewerEntity.setTags(tagEntityList);
+        reviewerEntity.setName(input.getName());
+        reviewerEntity.setSurname(input.getSurname());
+        reviewerEntity.setTitle(input.getTitle());
+        return ReviewerMapper.INSTANCE.toGetDTO(reviewerEntity);
     }
 
     @Override
     public void delete(Long id) {
-
+        reviewerRepo.deleteById(id);
     }
 }
