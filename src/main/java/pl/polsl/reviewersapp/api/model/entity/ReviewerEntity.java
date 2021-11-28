@@ -1,6 +1,8 @@
 package pl.polsl.reviewersapp.api.model.entity;
 
 import lombok.*;
+import pl.polsl.reviewersapp.api.model.entity.dictionary.TagEntity;
+import pl.polsl.reviewersapp.api.model.entity.dictionary.TitleEntity;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -25,10 +27,9 @@ public class ReviewerEntity implements Serializable {
     @Column(nullable = false)
     private String surname;
 
-    @Column(nullable = false)
-    private String title;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private TitleEntity title;
 
-    @Column(nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private FacultyEntity faculty;
 

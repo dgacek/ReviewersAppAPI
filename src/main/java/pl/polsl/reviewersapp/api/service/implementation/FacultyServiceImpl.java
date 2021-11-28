@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.polsl.reviewersapp.api.model.dto.faculty.FacultyAddDTO;
 import pl.polsl.reviewersapp.api.model.dto.faculty.FacultyGetUpdateDTO;
-import pl.polsl.reviewersapp.api.model.dto.mapper.FacultyMapper;
+import pl.polsl.reviewersapp.api.model.mapper.FacultyMapper;
 import pl.polsl.reviewersapp.api.model.entity.FacultyEntity;
 import pl.polsl.reviewersapp.api.model.repo.FacultyRepo;
 import pl.polsl.reviewersapp.api.service.FacultyService;
@@ -32,18 +32,22 @@ public class FacultyServiceImpl implements FacultyService {
     @Override
     public FacultyGetUpdateDTO add(FacultyAddDTO input) {
         return FacultyMapper.INSTANCE.toGetUpdateDTO(facultyRepo.save(FacultyEntity.builder()
-                .name(input.getName())
-                .symbol(input.getSymbol())
+                .name(input.name())
+                .symbol(input.symbol())
                 .build()));
     }
 
     @Override
     @Transactional
     public FacultyGetUpdateDTO update(FacultyGetUpdateDTO input) {
-        FacultyEntity facultyEntity = facultyRepo.findById(input.getId())
-                .orElseThrow(() -> new NoSuchElementException(String.format("Faculty id %d does not exist", input.getId())));
-        facultyEntity.setName(input.getName());
-        facultyEntity.setSymbol(input.getSymbol());
+        FacultyEntity facultyEntity = facultyRepo.findById(input.id())
+                .orElseThrow(() -> new NoSuchElementException(String.format("Faculty id %d does not exist", input.id())));
+
+        if (input.name() != null)
+            facultyEntity.setName(input.name());
+        if (input.symbol() != null)
+            facultyEntity.setSymbol(input.symbol());
+
         return FacultyMapper.INSTANCE.toGetUpdateDTO(facultyEntity);
     }
 

@@ -3,7 +3,7 @@ package pl.polsl.reviewersapp.api.service.implementation;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.polsl.reviewersapp.api.model.dto.mapper.ThesisMapper;
+import pl.polsl.reviewersapp.api.model.mapper.ThesisMapper;
 import pl.polsl.reviewersapp.api.model.dto.thesis.ThesisAddDTO;
 import pl.polsl.reviewersapp.api.model.dto.thesis.ThesisGetDTO;
 import pl.polsl.reviewersapp.api.model.dto.thesis.ThesisUpdateDTO;
@@ -35,12 +35,13 @@ public class ThesisServiceImpl implements ThesisService {
 
     @Override
     public ThesisGetDTO add(ThesisAddDTO input) {
-        ReviewerEntity reviewerEntity = reviewerRepo.findById(input.getReviewerId())
-                .orElseThrow(() -> new NoSuchElementException(String.format("Reviewer id %d does not exist", input.getReviewerId())));
+        ReviewerEntity reviewerEntity = reviewerRepo.findById(input.reviewerId())
+                .orElseThrow(() -> new NoSuchElementException(String.format("Reviewer id %d does not exist", input.reviewerId())));
+
         return ThesisMapper.INSTANCE.toGetUpdateDTO(thesisRepo.save(ThesisEntity.builder()
-                .authorName(input.getAuthorName())
-                .authorSurname(input.getAuthorSurname())
-                .topic(input.getTopic())
+                .authorName(input.authorName())
+                .authorSurname(input.authorSurname())
+                .topic(input.topic())
                 .reviewer(reviewerEntity)
                 .build()));
     }
@@ -48,14 +49,22 @@ public class ThesisServiceImpl implements ThesisService {
     @Override
     @Transactional
     public ThesisGetDTO update(ThesisUpdateDTO input) {
-        ThesisEntity thesisEntity = thesisRepo.findById(input.getId())
-                .orElseThrow(() -> new NoSuchElementException(String.format("Thesis id %d does not exist", input.getId())));
-        ReviewerEntity reviewerEntity = reviewerRepo.findById(input.getReviewerId())
-                .orElseThrow(() -> new NoSuchElementException(String.format("Reviewer id %d does not exist", input.getId())));
-        thesisEntity.setAuthorName(input.getAuthorName());
-        thesisEntity.setAuthorSurname(input.getAuthorSurname());
-        thesisEntity.setTopic(input.getTopic());
-        thesisEntity.setReviewer(reviewerEntity);
+        ThesisEntity thesisEntity = thesisRepo.findById(input.id())
+                .orElseThrow(() -> new NoSuchElementException(String.format("Thesis id %d does not exist", input.id())));
+
+        if (input.reviewerId() != null) {
+            ReviewerEntity reviewerEntity = reviewerRepo.findById(input.reviewerId())
+                    .orElseThrow(() -> new NoSuchElementException(String.format("Reviewer id %d does not exist", input.id())));
+            thesisEntity.setReviewer(reviewerEntity);
+        }
+
+        if (input.authorName() != null)
+            thesisEntity.setAuthorName(input.authorName());
+        if (input.authorSurname() != null)
+            thesisEntity.setAuthorSurname(input.authorSurname());
+        if (input.topic() != null)
+            thesisEntity.setTopic(input.topic());
+
         return ThesisMapper.INSTANCE.toGetUpdateDTO(thesisEntity);
     }
 

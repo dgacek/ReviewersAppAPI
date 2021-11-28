@@ -1,4 +1,4 @@
-package pl.polsl.reviewersapp.api.model.dto.mapper;
+package pl.polsl.reviewersapp.api.model.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
