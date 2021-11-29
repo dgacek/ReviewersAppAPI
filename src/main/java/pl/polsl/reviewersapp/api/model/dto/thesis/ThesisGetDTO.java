@@ -4,8 +4,7 @@ import pl.polsl.reviewersapp.api.model.dto.reviewer.ReviewerGetDTO;
 
 public record ThesisGetDTO (
         Long id,
-        String authorName,
-        String authorSurname,
+        String authorAlbumNumber,
         String topic,
         ReviewerGetDTO reviewer
 ) {}

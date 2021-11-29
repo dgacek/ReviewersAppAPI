@@ -27,6 +27,8 @@ public class ReviewerEntity implements Serializable {
     @Column(nullable = false)
     private String surname;
 
+    private String email;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private TitleEntity title;
 

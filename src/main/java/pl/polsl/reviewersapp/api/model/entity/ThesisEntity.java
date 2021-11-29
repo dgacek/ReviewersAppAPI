@@ -22,10 +22,7 @@ public class ThesisEntity implements Serializable {
     private String topic;
 
     @Column(nullable = false)
-    private String authorName;
-
-    @Column(nullable = false)
-    private String authorSurname;
+    private String authorAlbumNumber;
 
     @ManyToOne(fetch = FetchType.EAGER)
     private ReviewerEntity reviewer;

@@ -39,8 +39,7 @@ public class ThesisServiceImpl implements ThesisService {
                 .orElseThrow(() -> new NoSuchElementException(String.format("Reviewer id %d does not exist", input.reviewerId())));
 
         return ThesisMapper.INSTANCE.toGetUpdateDTO(thesisRepo.save(ThesisEntity.builder()
-                .authorName(input.authorName())
-                .authorSurname(input.authorSurname())
+                .authorAlbumNumber(input.authorAlbumNumber())
                 .topic(input.topic())
                 .reviewer(reviewerEntity)
                 .build()));
@@ -58,10 +57,8 @@ public class ThesisServiceImpl implements ThesisService {
             thesisEntity.setReviewer(reviewerEntity);
         }
 
-        if (input.authorName() != null)
-            thesisEntity.setAuthorName(input.authorName());
-        if (input.authorSurname() != null)
-            thesisEntity.setAuthorSurname(input.authorSurname());
+        if (input.authorAlbumNumber() != null)
+            thesisEntity.setAuthorAlbumNumber(input.authorAlbumNumber());
         if (input.topic() != null)
             thesisEntity.setTopic(input.topic());
 
