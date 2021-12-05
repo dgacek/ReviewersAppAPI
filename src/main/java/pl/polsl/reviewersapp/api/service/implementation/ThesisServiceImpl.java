@@ -35,8 +35,12 @@ public class ThesisServiceImpl implements ThesisService {
 
     @Override
     public ThesisGetDTO add(ThesisAddDTO input) {
-        ReviewerEntity reviewerEntity = reviewerRepo.findById(input.reviewerId())
-                .orElseThrow(() -> new NoSuchElementException(String.format("Reviewer id %d does not exist", input.reviewerId())));
+        ReviewerEntity reviewerEntity = null;
+
+        if (input.reviewerId() != null) {
+            reviewerEntity = reviewerRepo.findById(input.reviewerId())
+                    .orElseThrow(() -> new NoSuchElementException(String.format("Reviewer id %d does not exist", input.reviewerId())));
+        }
 
         return ThesisMapper.INSTANCE.toGetUpdateDTO(thesisRepo.save(ThesisEntity.builder()
                 .authorAlbumNumber(input.authorAlbumNumber())
