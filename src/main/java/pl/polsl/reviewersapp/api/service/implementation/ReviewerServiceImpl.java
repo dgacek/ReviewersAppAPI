@@ -55,6 +55,7 @@ public class ReviewerServiceImpl implements ReviewerService {
         return ReviewerMapper.INSTANCE.toGetDTO(reviewerRepo.save(ReviewerEntity.builder()
                 .name(input.name())
                 .surname(input.surname())
+                .email(input.email())
                 .faculty(facultyEntity)
                 .title(titleEntity)
                 .tags(tagEntityList)
@@ -92,6 +93,8 @@ public class ReviewerServiceImpl implements ReviewerService {
             reviewerEntity.setName(input.name());
         if (input.surname() != null)
             reviewerEntity.setSurname(input.surname());
+        if (input.email() != null)
+            reviewerEntity.setEmail(input.email());
 
         return ReviewerMapper.INSTANCE.toGetDTO(reviewerEntity);
     }
