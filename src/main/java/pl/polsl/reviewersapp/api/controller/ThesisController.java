@@ -53,4 +53,13 @@ public record ThesisController (
         thesisService.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @GetMapping("/next")
+    public ResponseEntity<Long> getNextRecordId(@RequestParam Long id) {
+        try {
+            return new ResponseEntity<>(thesisService.getNextRecordId(id), HttpStatus.OK);
+        } catch (IndexOutOfBoundsException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
 }

@@ -73,4 +73,10 @@ public class ThesisServiceImpl implements ThesisService {
     public void delete(Long id) {
         thesisRepo.deleteById(id);
     }
+
+    @Override
+    public Long getNextRecordId(Long id) {
+        return thesisRepo.getNextRecordId(id)
+                .orElseThrow(() -> new IndexOutOfBoundsException(String.format("Id %d is the last record in the table", id)));
+    }
 }
