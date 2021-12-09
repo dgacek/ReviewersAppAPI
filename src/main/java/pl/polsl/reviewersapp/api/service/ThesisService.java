@@ -12,5 +12,4 @@ public interface ThesisService {
     ThesisGetDTO add(ThesisAddDTO input);
     ThesisGetDTO update(ThesisUpdateDTO input);
     void delete(Long id);
-    Long getNextRecordId(Long id);
 }
