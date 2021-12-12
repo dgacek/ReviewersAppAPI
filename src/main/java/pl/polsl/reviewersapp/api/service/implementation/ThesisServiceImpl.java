@@ -59,7 +59,8 @@ public class ThesisServiceImpl implements ThesisService {
             ReviewerEntity reviewerEntity = reviewerRepo.findById(input.reviewerId())
                     .orElseThrow(() -> new NoSuchElementException(String.format("Reviewer id %d does not exist", input.id())));
             thesisEntity.setReviewer(reviewerEntity);
-        }
+        } else
+            thesisEntity.setReviewer(null);
 
         if (input.authorAlbumNumber() != null)
             thesisEntity.setAuthorAlbumNumber(input.authorAlbumNumber());
