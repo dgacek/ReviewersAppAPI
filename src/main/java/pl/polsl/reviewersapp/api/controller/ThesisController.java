@@ -3,6 +3,7 @@ package pl.polsl.reviewersapp.api.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import pl.polsl.reviewersapp.api.model.dto.thesis.ThesisAddDTO;
 import pl.polsl.reviewersapp.api.model.dto.thesis.ThesisGetDTO;
@@ -52,5 +53,15 @@ public record ThesisController (
     public ResponseEntity<Void> delete(@RequestParam Long id) {
         thesisService.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/import")
+    public ResponseEntity<Void> importExcel(@RequestParam MultipartFile file) {
+        try {
+            thesisService.importExcel(file);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 }
