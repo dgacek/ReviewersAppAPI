@@ -13,7 +13,8 @@ import java.io.Serializable;
 @Builder
 public class FacultyEntity implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "facultySeqGen")
+    @SequenceGenerator(name = "facultySeqGen", sequenceName = "faculty_id_seq", allocationSize = 1)
     @Column(nullable = false, updatable = false)
     private Long id;
 

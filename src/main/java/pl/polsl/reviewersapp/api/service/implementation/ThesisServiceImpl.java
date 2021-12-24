@@ -86,9 +86,6 @@ public class ThesisServiceImpl implements ThesisService {
 
     @Override
     public void importExcel(MultipartFile file) throws IOException {
-        if (!FilenameUtils.getExtension(file.getName()).equals("xlsx")) {
-            throw new IllegalArgumentException("The provided file is not an Excel file");
-        }
         Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(file.getBytes()));
         Sheet sheet = workbook.getSheetAt(0);
         ArrayList<Pair<String, String>> values = new ArrayList<>(sheet.getPhysicalNumberOfRows());
@@ -98,7 +95,7 @@ public class ThesisServiceImpl implements ThesisService {
             if (numberCell == null || topicCell == null) {
                 throw new IOException(String.format("Missing attribute at row %d", row.getRowNum() + 1));
             }
-            values.add(new Pair<>(numberCell.getCellType().equals(CellType.NUMERIC) ? String.valueOf(numberCell.getNumericCellValue()) : numberCell.getStringCellValue(), topicCell.getStringCellValue()));
+            values.add(new Pair<>(numberCell.getCellType().equals(CellType.NUMERIC) ? String.valueOf((int) numberCell.getNumericCellValue()) : numberCell.getStringCellValue(), topicCell.getStringCellValue()));
         }
         for (Pair<String, String> value : values) {
             thesisRepo.save(ThesisEntity.builder()

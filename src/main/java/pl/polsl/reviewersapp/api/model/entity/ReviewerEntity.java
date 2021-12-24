@@ -16,7 +16,8 @@ import java.util.List;
 @Builder
 public class ReviewerEntity implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reviewerSeqGen")
+    @SequenceGenerator(name = "reviewerSeqGen", sequenceName = "reviewer_id_seq", allocationSize = 1)
     @Column(nullable = false, updatable = false)
     private Long id;
 

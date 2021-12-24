@@ -17,7 +17,8 @@ import java.util.Collections;
 @Builder
 public class UserEntity implements Serializable, UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userSeqGen")
+    @SequenceGenerator(name = "userSeqGen", sequenceName = "user_id_seq", allocationSize = 1)
     @Column(nullable = false, updatable = false)
     private Long id;
 

@@ -17,7 +17,8 @@ import java.io.Serializable;
 @Setter
 public class DictionaryEntity implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dictionarySeqGen")
+    @SequenceGenerator(name = "dictionarySeqGen", sequenceName = "dictionary_id_seq", allocationSize = 1)
     @Column(nullable = false, updatable = false)
     protected Long id;
     protected String name;

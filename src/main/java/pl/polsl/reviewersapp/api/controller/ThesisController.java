@@ -56,7 +56,7 @@ public record ThesisController (
     }
 
     @PostMapping("/import")
-    public ResponseEntity<Void> importExcel(@RequestParam MultipartFile file) {
+    public ResponseEntity<Void> importExcel(@RequestParam("file") MultipartFile file) {
         try {
             thesisService.importExcel(file);
             return new ResponseEntity<>(HttpStatus.OK);
