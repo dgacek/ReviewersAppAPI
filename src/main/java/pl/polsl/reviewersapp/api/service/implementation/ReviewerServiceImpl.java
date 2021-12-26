@@ -1,8 +1,15 @@
 package pl.polsl.reviewersapp.api.service.implementation;
 
 import lombok.AllArgsConstructor;
+import org.apache.commons.math3.util.Pair;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import pl.polsl.reviewersapp.api.model.entity.dictionary.TagEntity;
 import pl.polsl.reviewersapp.api.model.entity.dictionary.TitleEntity;
 import pl.polsl.reviewersapp.api.model.mapper.ReviewerMapper;
@@ -16,9 +23,9 @@ import pl.polsl.reviewersapp.api.model.repo.FacultyRepo;
 import pl.polsl.reviewersapp.api.model.repo.ReviewerRepo;
 import pl.polsl.reviewersapp.api.service.ReviewerService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -102,5 +109,62 @@ public class ReviewerServiceImpl implements ReviewerService {
     @Override
     public void delete(Long id) {
         reviewerRepo.deleteById(id);
+    }
+
+    @Override
+    public void importExcel(MultipartFile file) throws IOException {
+        Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(file.getBytes()));
+        Sheet mainSheet = workbook.getSheetAt(0);
+        Sheet facultySheet = workbook.getSheetAt(1);
+        HashSet<String> titles = new HashSet<>();
+        HashSet<String> tags = new HashSet<>();
+
+        // READ DATA FROM WORKBOOK
+
+        HashSet<Pair<String, String>> faculties = new HashSet<>(facultySheet.getPhysicalNumberOfRows());
+
+        for (Row row : facultySheet) {
+            Cell symbolCell = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            Cell nameCell = row.getCell(1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+
+            if (symbolCell == null || nameCell == null) {
+                throw new IOException(String.format("Missing attribute at row %d in faculty sheet", row.getRowNum()+1));
+            }
+
+            faculties.add(new Pair<>(symbolCell.getStringCellValue(), nameCell.getStringCellValue()));
+        }
+
+        /*
+         * HashMap structure:
+         * NAME - String
+         * SURNAME - String
+         * TITLE_ID - Long
+         * TITLE_KEY - String
+         * EMAIL - String
+         * FACULTY_ID - Long
+         * FACULTY_KEY - String
+         * TAG_KEYS - ArrayList(String)
+         * TAG_IDS - ArrayLst(Long)
+         */
+        ArrayList<HashMap<String, Object>> reviewers = new ArrayList<>();
+
+        for (Row row : mainSheet) {
+            Cell nameCell = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            Cell surnameCell = row.getCell(1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            Cell titleCell = row.getCell(2, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            Cell facultyCell = row.getCell(3, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            Cell emailCell = row.getCell(4, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            Cell tagCell = row.getCell(5, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+
+            if (nameCell == null || surnameCell == null || titleCell == null || facultyCell == null) {
+                throw new IOException(String.format("Missing attribute at row %d in reviewer sheet", row.getRowNum()+1));
+            }
+
+
+        }
+
+        // INSERT INTO DATABASE
+
+
     }
 }

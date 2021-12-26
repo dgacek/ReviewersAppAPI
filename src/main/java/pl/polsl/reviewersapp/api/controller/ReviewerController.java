@@ -3,6 +3,7 @@ package pl.polsl.reviewersapp.api.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import pl.polsl.reviewersapp.api.model.dto.reviewer.ReviewerAddDTO;
 import pl.polsl.reviewersapp.api.model.dto.reviewer.ReviewerGetDTO;
@@ -52,5 +53,15 @@ public record ReviewerController (
     public ResponseEntity<Void> delete(@RequestParam Long id) {
         reviewerService.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/import")
+    public ResponseEntity<Void> importExcel(@RequestParam("file") MultipartFile file) {
+        try {
+            reviewerService.importExcel(file);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 }
