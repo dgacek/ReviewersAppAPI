@@ -107,6 +107,8 @@ public class ThesisServiceImpl implements ThesisService {
     @Override
     public byte[] exportToExcel() throws IOException {
         List<ThesisGetDTO> theses = ThesisMapper.INSTANCE.toGetDTOList(thesisRepo.findAll()).stream().filter(item -> item.reviewer() != null).toList();
+        if (theses.isEmpty())
+            throw new IOException("No attachments exist");
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet();
 
