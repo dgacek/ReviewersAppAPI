@@ -11,6 +11,6 @@ import java.util.List;
 public interface ThesisMapper {
     ThesisMapper INSTANCE = Mappers.getMapper(ThesisMapper.class);
 
-    ThesisGetDTO toGetUpdateDTO(ThesisEntity thesisEntity);
-    List<ThesisGetDTO> toGetUpdateDTOList(List<ThesisEntity> thesisEntityList);
+    ThesisGetDTO toGetDTO(ThesisEntity thesisEntity);
+    List<ThesisGetDTO> toGetDTOList(List<ThesisEntity> thesisEntityList);
 }

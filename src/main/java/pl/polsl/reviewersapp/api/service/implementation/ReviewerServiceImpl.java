@@ -21,6 +21,7 @@ import pl.polsl.reviewersapp.api.model.entity.ReviewerEntity;
 import pl.polsl.reviewersapp.api.model.repo.DictionaryRepo;
 import pl.polsl.reviewersapp.api.model.repo.FacultyRepo;
 import pl.polsl.reviewersapp.api.model.repo.ReviewerRepo;
+import pl.polsl.reviewersapp.api.model.repo.ThesisRepo;
 import pl.polsl.reviewersapp.api.service.ReviewerService;
 
 import java.io.ByteArrayInputStream;
@@ -33,6 +34,7 @@ public class ReviewerServiceImpl implements ReviewerService {
     private final ReviewerRepo reviewerRepo;
     private final FacultyRepo facultyRepo;
     private final DictionaryRepo dictionaryRepo;
+    private final ThesisRepo thesisRepo;
 
     @Override
     public ReviewerGetDTO get(Long id) {
@@ -112,6 +114,7 @@ public class ReviewerServiceImpl implements ReviewerService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void importExcel(MultipartFile file) throws IOException {
         Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(file.getBytes()));
         Sheet mainSheet = workbook.getSheetAt(0);
@@ -144,7 +147,7 @@ public class ReviewerServiceImpl implements ReviewerService {
          * FACULTY_ID - Long
          * FACULTY_KEY - String
          * TAG_KEYS - ArrayList(String)
-         * TAG_IDS - ArrayLst(Long)
+         * TAG_IDS - ArrayList(Long)
          */
         ArrayList<HashMap<String, Object>> reviewers = new ArrayList<>();
 
@@ -160,10 +163,71 @@ public class ReviewerServiceImpl implements ReviewerService {
                 throw new IOException(String.format("Missing attribute at row %d in reviewer sheet", row.getRowNum()+1));
             }
 
-
+            HashMap<String, Object> reviewer = new HashMap<>();
+            reviewer.put("NAME", nameCell.getStringCellValue());
+            reviewer.put("SURNAME", surnameCell.getStringCellValue());
+            reviewer.put("TITLE_KEY", titleCell.getStringCellValue());
+            titles.add(titleCell.getStringCellValue());
+            reviewer.put("FACULTY_KEY", facultyCell.getStringCellValue());
+            if (emailCell != null)
+                reviewer.put("EMAIL", emailCell.getStringCellValue());
+            if (tagCell != null) {
+                ArrayList<String> tagKeys = new ArrayList<>(Arrays.asList(tagCell.getStringCellValue().split(",")));
+                reviewer.put("TAG_KEYS", tagKeys);
+                tags.addAll(tagKeys);
+            }
+            reviewers.add(reviewer);
         }
 
         // INSERT INTO DATABASE
+
+        thesisRepo.clearAttachments();
+        reviewerRepo.deleteAll();
+        facultyRepo.deleteAll();
+        dictionaryRepo.deleteAll();
+
+        for (Pair<String, String> faculty : faculties) {
+            Long facultyId = facultyRepo.save(FacultyEntity.builder()
+                            .symbol(faculty.getFirst())
+                            .name(faculty.getSecond())
+                    .build()).getId();
+            reviewers.stream()
+                    .filter(item -> item.get("FACULTY_KEY").equals(faculty.getFirst()))
+                    .forEach(item -> item.put("FACULTY_ID", facultyId));
+        }
+
+        for (String title : titles) {
+            Long titleId = dictionaryRepo.save(new TitleEntity(title)).getId();
+            reviewers.stream()
+                    .filter(item -> item.get("TITLE_KEY").equals(title))
+                    .forEach(item -> item.put("TITLE_ID", titleId));
+        }
+
+        for (String tag : tags) {
+            Long tagId = dictionaryRepo.save(new TagEntity(tag)).getId();
+            reviewers.stream()
+                    .filter(item -> item.get("TAG_KEYS") != null && ((ArrayList<String>)item.get("TAG_KEYS")).contains(tag))
+                    .forEach(item -> {
+                        item.computeIfAbsent("TAG_IDS", k -> new ArrayList<Long>());
+                        ((ArrayList<Long>)item.get("TAG_IDS")).add(tagId);
+                    });
+        }
+
+        for (HashMap<String, Object> reviewer : reviewers) {
+            List<TagEntity> tagEntityList = new ArrayList<>();
+            for (Long tagId : (ArrayList<Long>) reviewer.get("TAG_IDS")) {
+                tagEntityList.add((TagEntity) dictionaryRepo.getById(tagId));
+            }
+
+            reviewerRepo.save(ReviewerEntity.builder()
+                            .name((String) reviewer.get("NAME"))
+                            .surname((String) reviewer.get("SURNAME"))
+                            .email((String) reviewer.get("EMAIL"))
+                            .faculty(facultyRepo.getById((Long) reviewer.get("FACULTY_ID")))
+                            .title((TitleEntity) dictionaryRepo.getById((Long) reviewer.get("TITLE_ID")))
+                            .tags(tagEntityList)
+                    .build());
+        }
 
 
     }

@@ -1,8 +1,6 @@
 package pl.polsl.reviewersapp.api.service.implementation;
 
 import lombok.AllArgsConstructor;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.math3.util.Pair;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -20,6 +18,7 @@ import pl.polsl.reviewersapp.api.model.repo.ThesisRepo;
 import pl.polsl.reviewersapp.api.service.ThesisService;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,13 +32,13 @@ public class ThesisServiceImpl implements ThesisService {
 
     @Override
     public ThesisGetDTO get(Long id) {
-        return ThesisMapper.INSTANCE.toGetUpdateDTO(thesisRepo.findById(id)
+        return ThesisMapper.INSTANCE.toGetDTO(thesisRepo.findById(id)
                 .orElseThrow(() -> new NoSuchElementException(String.format("Thesis id %d does not exist", id))));
     }
 
     @Override
     public List<ThesisGetDTO> getAll() {
-        return ThesisMapper.INSTANCE.toGetUpdateDTOList(thesisRepo.findAll());
+        return ThesisMapper.INSTANCE.toGetDTOList(thesisRepo.findAll());
     }
 
     @Override
@@ -51,7 +50,7 @@ public class ThesisServiceImpl implements ThesisService {
                     .orElseThrow(() -> new NoSuchElementException(String.format("Reviewer id %d does not exist", input.reviewerId())));
         }
 
-        return ThesisMapper.INSTANCE.toGetUpdateDTO(thesisRepo.save(ThesisEntity.builder()
+        return ThesisMapper.INSTANCE.toGetDTO(thesisRepo.save(ThesisEntity.builder()
                 .authorAlbumNumber(input.authorAlbumNumber())
                 .topic(input.topic())
                 .reviewer(reviewerEntity)
@@ -76,7 +75,7 @@ public class ThesisServiceImpl implements ThesisService {
         if (input.topic() != null)
             thesisEntity.setTopic(input.topic());
 
-        return ThesisMapper.INSTANCE.toGetUpdateDTO(thesisEntity);
+        return ThesisMapper.INSTANCE.toGetDTO(thesisEntity);
     }
 
     @Override
@@ -102,6 +101,40 @@ public class ThesisServiceImpl implements ThesisService {
                             .authorAlbumNumber(value.getFirst())
                             .topic(value.getSecond())
                     .build());
+        }
+    }
+
+    @Override
+    public byte[] exportToExcel() throws IOException {
+        List<ThesisGetDTO> theses = ThesisMapper.INSTANCE.toGetDTOList(thesisRepo.findAll()).stream().filter(item -> item.reviewer() != null).toList();
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet();
+
+            int rowNumber = 0;
+            for (ThesisGetDTO thesis : theses) {
+                Row row = sheet.createRow(rowNumber++);
+                Cell albumNumberCell = row.createCell(0);
+                Cell topicCell = row.createCell(1);
+                Cell reviewerNameCell = row.createCell(2);
+                Cell reviewerSurnameCell = row.createCell(3);
+                Cell reviewerTitleCell = row.createCell(4);
+                Cell reviewerFacultySymbolCell = row.createCell(5);
+                Cell reviewerFacultyNameCell = row.createCell(6);
+                Cell reviewerEmailCell = row.createCell(7);
+
+                albumNumberCell.setCellValue(thesis.authorAlbumNumber());
+                topicCell.setCellValue(thesis.topic());
+                reviewerNameCell.setCellValue(thesis.reviewer().name());
+                reviewerSurnameCell.setCellValue(thesis.reviewer().surname());
+                reviewerTitleCell.setCellValue(thesis.reviewer().title().name());
+                reviewerFacultySymbolCell.setCellValue(thesis.reviewer().faculty().symbol());
+                reviewerFacultyNameCell.setCellValue(thesis.reviewer().faculty().name());
+                if (thesis.reviewer().email() != null)
+                    reviewerEmailCell.setCellValue(thesis.reviewer().email());
+            }
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            return outputStream.toByteArray();
         }
     }
 }

@@ -15,4 +15,5 @@ public interface ThesisService {
     ThesisGetDTO update(ThesisUpdateDTO input);
     void delete(Long id);
     void importExcel(MultipartFile file) throws IOException;
+    byte[] exportToExcel() throws IOException;
 }
