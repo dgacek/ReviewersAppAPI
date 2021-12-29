@@ -1,6 +1,7 @@
 package pl.polsl.reviewersapp.api.service;
 
 import pl.polsl.reviewersapp.api.model.dto.user.UserAddDTO;
+import pl.polsl.reviewersapp.api.model.dto.user.UserChangePasswordDTO;
 import pl.polsl.reviewersapp.api.model.dto.user.UserGetDTO;
 import pl.polsl.reviewersapp.api.model.dto.user.UserUpdateDTO;
 
@@ -12,4 +13,5 @@ public interface UserService {
     UserGetDTO add(UserAddDTO input);
     UserGetDTO update(UserUpdateDTO input);
     void delete(Long id);
+    void changePassword(UserChangePasswordDTO input, String token) throws IllegalAccessException;
 }

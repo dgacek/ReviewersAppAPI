@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import pl.polsl.reviewersapp.api.model.dto.auth.AuthRequestDTO;
 import pl.polsl.reviewersapp.api.model.dto.auth.AuthResponseDTO;
 import pl.polsl.reviewersapp.api.model.entity.UserEntity;
@@ -33,7 +34,7 @@ public class AuthController {
                     HttpStatus.OK);
 
         } catch (BadCredentialsException e) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
         }
     }
 }

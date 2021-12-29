@@ -28,6 +28,10 @@ public class JwtUtils {
         return getAllClaims(token).getSubject().split(",")[1];
     }
 
+    public Long getUserId(String token) {
+        return Long.parseLong(getAllClaims(token).getSubject().split(",")[0]);
+    }
+
     private Claims getAllClaims(String token) {
         return Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(token).getBody();
     }
