@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'pl.polsl.reviewersapp'
-version = '0.0.1-SNAPSHOT'
+version = ''
 sourceCompatibility = '17'
 
 configurations {
