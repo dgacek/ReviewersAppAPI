@@ -6,5 +6,7 @@ public record ThesisGetDTO (
         Long id,
         String authorAlbumNumber,
         String topic,
+        String keywords,
+        String summary,
         ReviewerGetDTO reviewer
 ) {}

@@ -1,7 +1,6 @@
 package pl.polsl.reviewersapp.api.service.implementation;
 
 import lombok.AllArgsConstructor;
-import org.apache.commons.math3.util.Pair;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
@@ -21,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -53,6 +53,8 @@ public class ThesisServiceImpl implements ThesisService {
         return ThesisMapper.INSTANCE.toGetDTO(thesisRepo.save(ThesisEntity.builder()
                 .authorAlbumNumber(input.authorAlbumNumber())
                 .topic(input.topic())
+                .keywords(input.keywords())
+                .summary(input.summary())
                 .reviewer(reviewerEntity)
                 .build()));
     }
@@ -74,6 +76,10 @@ public class ThesisServiceImpl implements ThesisService {
             thesisEntity.setAuthorAlbumNumber(input.authorAlbumNumber());
         if (input.topic() != null)
             thesisEntity.setTopic(input.topic());
+        if (input.keywords() != null)
+            thesisEntity.setKeywords(input.keywords());
+        if (input.summary() != null)
+            thesisEntity.setSummary(input.summary());
 
         return ThesisMapper.INSTANCE.toGetDTO(thesisEntity);
     }
@@ -87,19 +93,30 @@ public class ThesisServiceImpl implements ThesisService {
     public void importExcel(MultipartFile file) throws IOException {
         Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(file.getBytes()));
         Sheet sheet = workbook.getSheetAt(0);
-        ArrayList<Pair<String, String>> values = new ArrayList<>(sheet.getPhysicalNumberOfRows());
+        ArrayList<HashMap<String, String>> values = new ArrayList<>(sheet.getPhysicalNumberOfRows());
         for (Row row : sheet) {
             Cell numberCell = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
             Cell topicCell = row.getCell(1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-            if (numberCell == null || topicCell == null) {
+            Cell keywordsCell = row.getCell(2, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            Cell summaryCell = row.getCell(3, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            if (numberCell == null || topicCell == null) { //required values
                 throw new IOException(String.format("Missing attribute at row %d", row.getRowNum() + 1));
             }
-            values.add(new Pair<>(numberCell.getCellType().equals(CellType.NUMERIC) ? String.valueOf((int) numberCell.getNumericCellValue()) : numberCell.getStringCellValue(), topicCell.getStringCellValue()));
+
+            HashMap<String, String> tmp = new HashMap<>();
+            // excel might set the data type to numeric in this cell so a type check is needed
+            tmp.put("number", numberCell.getCellType().equals(CellType.NUMERIC) ? String.valueOf((int) numberCell.getNumericCellValue()) : numberCell.getStringCellValue());
+            tmp.put("topic", topicCell.getStringCellValue());
+            tmp.put("keywords", keywordsCell.getStringCellValue());
+            tmp.put("summary", summaryCell.getStringCellValue());
+            values.add(tmp);
         }
-        for (Pair<String, String> value : values) {
+        for (HashMap<String, String> value : values) {
             thesisRepo.save(ThesisEntity.builder()
-                            .authorAlbumNumber(value.getFirst())
-                            .topic(value.getSecond())
+                            .authorAlbumNumber(value.get("number"))
+                            .topic(value.get("topic"))
+                            .keywords(value.get("keywords"))
+                            .summary(value.get("summary"))
                     .build());
         }
     }

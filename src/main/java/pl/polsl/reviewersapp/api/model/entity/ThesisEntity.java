@@ -18,11 +18,17 @@ public class ThesisEntity implements Serializable {
     @Column(nullable = false, updatable = false)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 16384)
     private String topic;
 
     @Column(nullable = false)
     private String authorAlbumNumber;
+
+    @Column(length = 16384)
+    private String keywords;
+
+    @Lob
+    private String summary;
 
     @ManyToOne(fetch = FetchType.EAGER)
     private ReviewerEntity reviewer;
